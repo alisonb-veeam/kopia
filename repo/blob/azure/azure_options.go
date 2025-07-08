@@ -23,6 +23,9 @@ type Options struct {
 	// Alternatively provide SAS Token
 	SASToken string `json:"sasToken" kopia:"sensitive"`
 
+	// Bool option to use a Managed Identity with Azure Federated Identity Credentials
+	AzureFederatedIdentity bool `json:"managedIdentity,omitempty"`
+
 	// the tenant-ID/client-ID/client-Secret of the service principal
 	TenantID     string
 	ClientID     string

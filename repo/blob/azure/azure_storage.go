@@ -4,6 +4,7 @@ package azure
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -425,6 +426,22 @@ func getAZService(opt *Options, storageHostname string) (*azblob.Client, error) 
 		service, serviceErr = azblob.NewClientWithSharedKeyCredential(
 			fmt.Sprintf("https://%s/", storageHostname), cred, nil,
 		)
+	// managed identity with federated identity credentials
+	case opt.AzureFederatedIdentity:
+		// seems client id and tenant id are already passed in, do we want to get them from os.Getenv or the options?
+		// they have to exist for federated identity in the pod, so it might make sense to get them via
+		// os so that a minimal set of variables need to be included in an API call
+		cred, err := azidentity.NewWorkloadIdentityCredential(&azidentity.WorkloadIdentityCredentialOptions{
+			ClientID:      os.Getenv("AZURE_CLIENT_ID"),
+			TenantID:      os.Getenv("AZURE_TENANT_ID"),
+			TokenFilePath: os.Getenv("AZURE_FEDERATED_TOKEN_FILE"),
+		})
+		if err != nil {
+			fmt.Printf("failed to obtain workload identity credential: %v\n", err)
+			return nil, errors.Wrap(err, "unable to initialize workload identity credential")
+		}
+		service, serviceErr = azblob.NewClient(fmt.Sprintf("https://%s.blob.core.windows.net/", opt.StorageAccount), cred, nil)
+		fmt.Println("ALISON HERE: Successfully obtained federated identity service client")
 	// client secret
 	case opt.TenantID != "" && opt.ClientID != "" && opt.ClientSecret != "":
 		cred, err := azidentity.NewClientSecretCredential(opt.TenantID, opt.ClientID, opt.ClientSecret, nil)

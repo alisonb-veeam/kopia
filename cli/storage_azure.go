@@ -26,6 +26,7 @@ func (c *storageAzureFlags) Setup(svc StorageProviderServices, cmd *kingpin.CmdC
 	cmd.Flag("client-id", "Azure service principle client ID (overrides AZURE_CLIENT_ID environment variable)").Envar(svc.EnvName("AZURE_CLIENT_ID")).StringVar(&c.azOptions.ClientID)
 	cmd.Flag("client-secret", "Azure service principle client secret (overrides AZURE_CLIENT_SECRET environment variable)").Envar(svc.EnvName("AZURE_CLIENT_SECRET")).StringVar(&c.azOptions.ClientSecret)
 	cmd.Flag("client-cert", "Azure client certificate (overrides AZURE_CLIENT_CERT environment variable)").Envar(svc.EnvName("AZURE_CLIENT_CERT")).StringVar(&c.azOptions.ClientCert)
+	cmd.Flag("use-azure-federated-identity", "Use Azure Managed Identity with Azure Federated Identity for Azure authentication").Envar(svc.EnvName("AZURE_USE_MANAGED_IDENTITY_WITH_AFI")).BoolVar(&c.azOptions.AzureFederatedIdentity)
 
 	commonThrottlingFlags(cmd, &c.azOptions.Limits)
 
